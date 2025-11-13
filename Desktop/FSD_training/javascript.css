@@ -1,0 +1,12 @@
+#a{
+  background-color: lightgreen;
+}
+#b{
+  background-color: lightblue;
+}
+#c{
+  background-color: lightpink;
+}
+.h{
+  display: inline-block;
+}

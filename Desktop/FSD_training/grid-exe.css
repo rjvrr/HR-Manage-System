@@ -1,0 +1,20 @@
+.container{
+  background-color: red;
+  height:300px;
+  width:292px;
+  display:grid;
+  grid-template-columns: 120px 120px;
+  grid-template-rows: 120px 120px;
+  row-gap: 50px;
+  column-gap:50px;
+  align-items: center;
+  justify-items: center;
+  margin-top: 50px;
+  justify-self: center;
+  
+}
+.item{
+  height: 60px;
+  width: 60px;
+  background-color: black;
+}
