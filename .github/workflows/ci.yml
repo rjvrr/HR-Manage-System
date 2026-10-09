@@ -74,7 +74,7 @@ jobs:
     timeout-minutes: 15
     defaults:
       run:
-        working-directory: frontend
+        working-directory: Desktop/healthcare/frontend
 
     steps:
       - name: Check out repository
@@ -85,7 +85,7 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: Desktop/healthcare/frontend/package-lock.json
 
       - name: Install dependencies (clean install)
         run: npm ci
@@ -107,7 +107,7 @@ jobs:
         if: success()
         with:
           name: hrgenius-frontend-dist
-          path: frontend/dist/frontend/
+          path: Desktop/healthcare/frontend/dist/frontend/
           retention-days: 7
 
   # =========================================================================
