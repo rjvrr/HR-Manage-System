@@ -1,0 +1,9 @@
+@crossorigin
+github/workflow make yml file
+backend
+frontend
+synopsis
+ppt
+$env:DB_USERNAME="root"
+$env:DB_PASSWORD="Sin30=1/2"
+.\mvnw spring-boot:run

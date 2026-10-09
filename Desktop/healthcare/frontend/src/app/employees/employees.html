@@ -1,0 +1,109 @@
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">PEOPLE DIRECTORY</p>
+    <h1>Employees</h1>
+    <p class="muted">Keep your people data accurate, searchable, and ready for action.</p>
+  </div>
+  <button class="primary-button" type="button" (click)="openCreate()"><span>+</span> Add employee</button>
+</section>
+
+<div class="toolbar panel">
+  <label class="search-box">
+    <span>⌕</span>
+    <input [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()" placeholder="Search people, roles, or email" />
+  </label>
+  <select [(ngModel)]="departmentFilter" (ngModelChange)="applyFilters()">
+    <option *ngFor="let department of departments">{{ department }}</option>
+  </select>
+  <button class="ghost-button" type="button" (click)="loadEmployees()">↻ Refresh</button>
+</div>
+
+<p class="success-banner" *ngIf="successMessage">{{ successMessage }}</p>
+<p class="error-banner" *ngIf="error">{{ error }}</p>
+
+<div class="panel table-panel">
+  <div class="table-header"><div><h2>All employees</h2><span>{{ filteredEmployees.length }} results</span></div><span class="status-dot">Live data</span></div>
+  <div class="loading-state" *ngIf="loading">Loading your people directory...</div>
+  <div class="empty-state" *ngIf="!loading && !filteredEmployees.length">No employees match your current filters.</div>
+  <div class="table-scroll" *ngIf="!loading && filteredEmployees.length">
+    <table>
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>ID</th>
+          <th>Department</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Hire date</th>
+          <th>Annual salary</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let employee of filteredEmployees">
+          <td>
+            <div class="person">
+              <span class="initials">{{ getInitials(employee) }}</span>
+              <div>
+                <strong>{{ employee.firstName }} {{ employee.lastName }}</strong>
+                <small>{{ employee.email }}<span *ngIf="employee.phone"> • {{ employee.phone }}</span></small>
+              </div>
+            </div>
+          </td>
+          <td><code>{{ employee.employeeNumber || '—' }}</code></td>
+          <td>{{ employee.department }}</td>
+          <td>{{ employee.jobTitle }}</td>
+          <td>
+            <span class="pill"
+              [class.active-pill]="employee.employmentStatus === 'Active'"
+              [class.onboarding-pill]="employee.employmentStatus === 'Onboarding'"
+              [class.inactive-pill]="employee.employmentStatus !== 'Active' && employee.employmentStatus !== 'Onboarding'">
+              {{ employee.employmentStatus }}
+            </span>
+          </td>
+          <td>{{ employee.hireDate ? (employee.hireDate | date:'mediumDate') : '—' }}</td>
+          <td>{{ employee.annualSalary | currency:'INR':'symbol':'1.0-0' }}</td>
+          <td class="actions">
+            <button type="button" title="Edit employee" (click)="openEdit(employee)">Edit</button>
+            <button type="button" title="Delete employee" (click)="deleteEmployee(employee)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="showForm" (click)="closeForm()">
+  <form class="modal" *ngIf="selectedEmployee" (ngSubmit)="saveEmployee()" (click)="$event.stopPropagation()">
+    <div class="modal-heading">
+      <div>
+        <p class="eyebrow">EMPLOYEE RECORD</p>
+        <h2>{{ selectedEmployee.id ? 'Edit employee' : 'Add employee' }}</h2>
+      </div>
+      <button class="close-button" type="button" (click)="closeForm()">×</button>
+    </div>
+    <div class="form-grid">
+      <label>Employee number<input name="employeeNumber" [(ngModel)]="selectedEmployee.employeeNumber" required /></label>
+      <label>First name<input name="firstName" [(ngModel)]="selectedEmployee.firstName" required /></label>
+      <label>Last name<input name="lastName" [(ngModel)]="selectedEmployee.lastName" required /></label>
+      <label>Email<input name="email" type="email" [(ngModel)]="selectedEmployee.email" required /></label>
+      <label>Phone<input name="phone" [(ngModel)]="selectedEmployee.phone" /></label>
+      <label>Department<input name="department" [(ngModel)]="selectedEmployee.department" required /></label>
+      <label>Job title<input name="jobTitle" [(ngModel)]="selectedEmployee.jobTitle" required /></label>
+      <label>Status
+        <select name="employmentStatus" [(ngModel)]="selectedEmployee.employmentStatus">
+          <option>Active</option>
+          <option>Onboarding</option>
+          <option>On leave</option>
+          <option>Inactive</option>
+        </select>
+      </label>
+      <label>Hire date<input name="hireDate" type="date" [(ngModel)]="selectedEmployee.hireDate" /></label>
+      <label>Annual salary (INR)<input name="annualSalary" type="number" [(ngModel)]="selectedEmployee.annualSalary" min="0" /></label>
+    </div>
+    <div class="modal-actions">
+      <button class="ghost-button" type="button" (click)="closeForm()">Cancel</button>
+      <button class="primary-button" type="submit" [disabled]="saving">{{ saving ? 'Saving...' : 'Save employee' }}</button>
+    </div>
+  </form>
+</div>

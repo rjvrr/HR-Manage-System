@@ -1,0 +1,145 @@
+<mat-sidenav-container class="app-container">
+
+  <!-- Sidebar -->
+  <mat-sidenav mode="side" opened class="sidebar">
+
+    <div class="brand">
+      <div class="brand-logo">H</div>
+
+      <div>
+        <div class="brand-name">HRGenius</div>
+        <div class="brand-subtitle">HR Management System</div>
+      </div>
+    </div>
+
+    <div class="menu-label">MAIN MENU</div>
+
+    <mat-nav-list>
+
+      <a mat-list-item
+         routerLink="/dashboard"
+         routerLinkActive="active">
+        <mat-icon>grid_view</mat-icon>
+        <span>Dashboard</span>
+      </a>
+
+      <a mat-list-item
+         routerLink="/employees"
+         routerLinkActive="active">
+        <mat-icon>badge</mat-icon>
+        <span>Employees</span>
+      </a>
+
+      <a mat-list-item
+         routerLink="/candidates"
+         routerLinkActive="active">
+        <mat-icon>person_search</mat-icon>
+        <span>Recruitment</span>
+      </a>
+
+      <a mat-list-item
+         routerLink="/jobs"
+         routerLinkActive="active">
+        <mat-icon>work_outline</mat-icon>
+        <span>Jobs</span>
+      </a>
+
+      <a mat-list-item
+         routerLink="/payroll"
+         routerLinkActive="active">
+        <mat-icon>payments</mat-icon>
+        <span>Payroll</span>
+      </a>
+
+      <a mat-list-item
+         routerLink="/performance"
+         routerLinkActive="active">
+        <mat-icon>auto_graph</mat-icon>
+        <span>Performance</span>
+      </a>
+
+    </mat-nav-list>
+
+    <div class="sidebar-bottom">
+
+      <div class="menu-label">SYSTEM</div>
+
+      <a mat-list-item (click)="openSettings()" style="cursor: pointer;">
+        <mat-icon>settings</mat-icon>
+        <span>Settings & Info</span>
+      </a>
+
+    </div>
+
+  </mat-sidenav>
+
+
+  <!-- Main content -->
+  <mat-sidenav-content>
+
+    <mat-toolbar class="topbar">
+
+      <div class="page-title">People operations <span>/ HRGenius</span></div>
+
+      <span class="spacer"></span>
+
+      <button mat-button class="profile-button" (click)="openSettings()">
+        <div class="avatar">A</div>
+
+        <div class="profile-info">
+          <strong>Admin</strong>
+          <small>HR Administrator</small>
+        </div>
+      </button>
+
+    </mat-toolbar>
+
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </mat-sidenav-content>
+
+</mat-sidenav-container>
+
+<!-- Settings Modal -->
+<div class="modal-backdrop" *ngIf="showSettings" (click)="closeSettings()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-heading">
+      <div>
+        <p class="eyebrow">SYSTEM CONFIGURATION</p>
+        <h2>HRGenius Information</h2>
+      </div>
+      <button class="close-button" type="button" (click)="closeSettings()">×</button>
+    </div>
+    <div class="settings-content">
+      <div class="settings-row">
+        <span>Application:</span>
+        <strong>HRGenius Enterprise HRMS</strong>
+      </div>
+      <div class="settings-row">
+        <span>Version:</span>
+        <code>v1.0.0 (Production-Ready)</code>
+      </div>
+      <div class="settings-row">
+        <span>Backend Status:</span>
+        <strong [style.color]="backendHealth.startsWith('UP') ? '#15803d' : '#b91c1c'">{{ backendHealth }}</strong>
+      </div>
+      <div class="settings-row">
+        <span>Database Engine:</span>
+        <span>MySQL 8.0 (schema: <code>hrgenius</code>)</span>
+      </div>
+      <div class="settings-row">
+        <span>Active Modules:</span>
+        <span>Employee Directory, Recruitment, Requisitions, Payroll, Appraisals, Analytics</span>
+      </div>
+      <div class="settings-row">
+        <span>REST API:</span>
+        <code>http://localhost:8080/api</code>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="primary-button" type="button" (click)="closeSettings()">Close</button>
+    </div>
+  </div>
+</div>

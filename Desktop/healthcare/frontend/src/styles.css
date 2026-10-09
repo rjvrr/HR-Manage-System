@@ -1,0 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+* { box-sizing: border-box; }
+html, body { background: #f4f8f7; color: #385058; font-family: 'DM Sans', sans-serif; margin: 0; }
+h1, h2, h3, .brand-name, .page-title { font-family: 'Space Grotesk', sans-serif; }
+button, input, select { font-family: inherit; }

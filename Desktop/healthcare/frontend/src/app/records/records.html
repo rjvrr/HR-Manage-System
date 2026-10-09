@@ -1,0 +1,306 @@
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">HR OPERATIONS</p>
+    <h1>{{ title }}</h1>
+    <p class="muted">{{ description }}</p>
+  </div>
+  <div class="header-actions">
+    <button class="ghost-button" type="button" (click)="load()">↻ Refresh</button>
+    <button class="primary-button" type="button" (click)="openCreate()">
+      <span>+</span>
+      <span *ngIf="resource === 'candidates'">Add Candidate</span>
+      <span *ngIf="resource === 'jobs'">Post Job</span>
+      <span *ngIf="resource === 'payroll'">New Payroll Entry</span>
+      <span *ngIf="resource === 'performance'">New Review</span>
+    </button>
+  </div>
+</section>
+
+<div class="toolbar panel">
+  <label class="search-box">
+    <span>⌕</span>
+    <input [(ngModel)]="searchTerm" (ngModelChange)="applyFilter()" placeholder="Search this workspace" />
+  </label>
+</div>
+
+<p class="success-banner" *ngIf="successMessage">{{ successMessage }}</p>
+<p class="error-banner" *ngIf="error">{{ error }}</p>
+
+<div class="panel table-panel">
+  <div class="table-header">
+    <div>
+      <h2>{{ title }} records</h2>
+      <span>{{ filteredRows.length }} results</span>
+    </div>
+    <span class="status-dot">Live Database</span>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">Loading live records...</div>
+  <div class="empty-state" *ngIf="!loading && !filteredRows.length">No records found. Click "+ Add" above to create one.</div>
+
+  <div class="table-scroll" *ngIf="!loading && filteredRows.length">
+    <!-- Candidates Table -->
+    <table *ngIf="resource === 'candidates'">
+      <thead>
+        <tr>
+          <th>Candidate</th>
+          <th>Role applied</th>
+          <th>Status</th>
+          <th>Applied date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of filteredRows">
+          <td>
+            <div class="person">
+              <strong>{{ asCandidate(item).name }}</strong>
+              <small>{{ asCandidate(item).email }} • {{ asCandidate(item).phone }}</small>
+            </div>
+          </td>
+          <td>{{ asCandidate(item).jobTitle }}</td>
+          <td>
+            <span class="pill"
+              [class.active-pill]="asCandidate(item).status === 'Hired'"
+              [class.onboarding-pill]="asCandidate(item).status === 'Offered' || asCandidate(item).status === 'Interviewing'"
+              [class.inactive-pill]="asCandidate(item).status === 'Rejected'">
+              {{ asCandidate(item).status }}
+            </span>
+          </td>
+          <td>{{ asCandidate(item).appliedDate | date:'mediumDate' }}</td>
+          <td class="actions">
+            <button type="button" class="onboard-btn" *ngIf="asCandidate(item).status !== 'Hired'" (click)="onboardCandidate(asCandidate(item))" title="Onboard as employee">Onboard</button>
+            <button type="button" (click)="openEdit(item)">Edit</button>
+            <button type="button" class="delete-btn" (click)="deleteItem(item)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Jobs Table -->
+    <table *ngIf="resource === 'jobs'">
+      <thead>
+        <tr>
+          <th>Position title</th>
+          <th>Department</th>
+          <th>Employment type</th>
+          <th>Status</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of filteredRows">
+          <td><strong>{{ asJob(item).title }}</strong></td>
+          <td>{{ asJob(item).department }}</td>
+          <td>{{ asJob(item).employmentType }}</td>
+          <td>
+            <span class="pill"
+              [class.active-pill]="asJob(item).status === 'Open'"
+              [class.inactive-pill]="asJob(item).status === 'Closed'">
+              {{ asJob(item).status }}
+            </span>
+          </td>
+          <td class="description">{{ asJob(item).description }}</td>
+          <td class="actions">
+            <button type="button" (click)="openEdit(item)">Edit</button>
+            <button type="button" class="delete-btn" (click)="deleteItem(item)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Payroll Table -->
+    <table *ngIf="resource === 'payroll'">
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>Pay period</th>
+          <th>Gross pay</th>
+          <th>Deductions</th>
+          <th>Net pay</th>
+          <th>Processed date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of filteredRows">
+          <td>
+            <div class="person">
+              <strong>{{ employeeName(item) }}</strong>
+              <small *ngIf="asPayroll(item).employee">{{ asPayroll(item).employee.department }} • {{ asPayroll(item).employee.jobTitle }}</small>
+            </div>
+          </td>
+          <td>{{ asPayroll(item).payPeriod }}</td>
+          <td>{{ asPayroll(item).grossPay | currency:'INR':'symbol':'1.0-0' }}</td>
+          <td>{{ asPayroll(item).deductions | currency:'INR':'symbol':'1.0-0' }}</td>
+          <td><strong>{{ asPayroll(item).netPay | currency:'INR':'symbol':'1.0-0' }}</strong></td>
+          <td>{{ asPayroll(item).processedDate | date:'mediumDate' }}</td>
+          <td class="actions">
+            <button type="button" (click)="openEdit(item)">Edit</button>
+            <button type="button" class="delete-btn" (click)="deleteItem(item)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Performance Table -->
+    <table *ngIf="resource === 'performance'">
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>Review period</th>
+          <th>Rating</th>
+          <th>Review date</th>
+          <th>Comments</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of filteredRows">
+          <td>
+            <div class="person">
+              <strong>{{ employeeName(item) }}</strong>
+              <small *ngIf="asReview(item).employee">{{ asReview(item).employee.department }} • {{ asReview(item).employee.jobTitle }}</small>
+            </div>
+          </td>
+          <td>{{ asReview(item).reviewPeriod }}</td>
+          <td>
+            <span class="rating">
+              ★ {{ asReview(item).rating }}/5
+            </span>
+          </td>
+          <td>{{ asReview(item).reviewDate | date:'mediumDate' }}</td>
+          <td class="description">{{ asReview(item).comments }}</td>
+          <td class="actions">
+            <button type="button" (click)="openEdit(item)">Edit</button>
+            <button type="button" class="delete-btn" (click)="deleteItem(item)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Backdrops -->
+<div class="modal-backdrop" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-heading">
+      <div>
+        <p class="eyebrow">{{ title | uppercase }} RECORD</p>
+        <h2>{{ isEdit ? 'Edit ' + title : 'New ' + title }}</h2>
+      </div>
+      <button class="close-button" type="button" (click)="closeModal()">×</button>
+    </div>
+
+    <!-- Candidate Form -->
+    <form *ngIf="resource === 'candidates'" (ngSubmit)="saveRecord()">
+      <div class="form-grid">
+        <label>Full name<input name="name" [(ngModel)]="candidateForm.name" required /></label>
+        <label>Email address<input name="email" type="email" [(ngModel)]="candidateForm.email" required /></label>
+        <label>Phone number<input name="phone" [(ngModel)]="candidateForm.phone" /></label>
+        <label>Job title applied for<input name="jobTitle" [(ngModel)]="candidateForm.jobTitle" required /></label>
+        <label>Application status
+          <select name="status" [(ngModel)]="candidateForm.status">
+            <option>Applied</option>
+            <option>Screening</option>
+            <option>Interviewing</option>
+            <option>Offered</option>
+            <option>Hired</option>
+            <option>Rejected</option>
+          </select>
+        </label>
+        <label>Application date<input name="appliedDate" type="date" [(ngModel)]="candidateForm.appliedDate" /></label>
+      </div>
+      <div class="modal-actions">
+        <button class="ghost-button" type="button" (click)="closeModal()">Cancel</button>
+        <button class="primary-button" type="submit" [disabled]="saving">{{ saving ? 'Saving...' : 'Save Candidate' }}</button>
+      </div>
+    </form>
+
+    <!-- Job Form -->
+    <form *ngIf="resource === 'jobs'" (ngSubmit)="saveRecord()">
+      <div class="form-grid">
+        <label>Position title<input name="title" [(ngModel)]="jobForm.title" required /></label>
+        <label>Department<input name="department" [(ngModel)]="jobForm.department" required /></label>
+        <label>Employment type
+          <select name="employmentType" [(ngModel)]="jobForm.employmentType">
+            <option>Full-Time</option>
+            <option>Part-Time</option>
+            <option>Contract</option>
+            <option>Remote</option>
+          </select>
+        </label>
+        <label>Status
+          <select name="status" [(ngModel)]="jobForm.status">
+            <option>Open</option>
+            <option>Draft</option>
+            <option>Closed</option>
+          </select>
+        </label>
+        <label class="full-width">Job description
+          <textarea name="description" rows="3" [(ngModel)]="jobForm.description"></textarea>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button class="ghost-button" type="button" (click)="closeModal()">Cancel</button>
+        <button class="primary-button" type="submit" [disabled]="saving">{{ saving ? 'Saving...' : 'Save Job' }}</button>
+      </div>
+    </form>
+
+    <!-- Payroll Form -->
+    <form *ngIf="resource === 'payroll'" (ngSubmit)="saveRecord()">
+      <div class="form-grid">
+        <label>Select employee
+          <select name="employeeId" [(ngModel)]="payrollForm.employeeId" required>
+            <option [ngValue]="null" disabled>Choose an employee</option>
+            <option *ngFor="let emp of employeesList" [ngValue]="emp.id">
+              {{ emp.firstName }} {{ emp.lastName }} ({{ emp.department }} - {{ emp.jobTitle }})
+            </option>
+          </select>
+        </label>
+        <label>Pay period (e.g. October 2026)<input name="payPeriod" [(ngModel)]="payrollForm.payPeriod" required /></label>
+        <label>Gross pay (INR)<input name="grossPay" type="number" [(ngModel)]="payrollForm.grossPay" (ngModelChange)="onPayrollPayChange()" min="0" required /></label>
+        <label>Deductions (INR)<input name="deductions" type="number" [(ngModel)]="payrollForm.deductions" (ngModelChange)="onPayrollPayChange()" min="0" /></label>
+        <label>Net pay (Calculated)<input name="netPay" type="number" [(ngModel)]="payrollForm.netPay" readonly /></label>
+        <label>Processing date<input name="processedDate" type="date" [(ngModel)]="payrollForm.processedDate" /></label>
+      </div>
+      <div class="modal-actions">
+        <button class="ghost-button" type="button" (click)="closeModal()">Cancel</button>
+        <button class="primary-button" type="submit" [disabled]="saving">{{ saving ? 'Saving...' : 'Save Payroll Record' }}</button>
+      </div>
+    </form>
+
+    <!-- Performance Review Form -->
+    <form *ngIf="resource === 'performance'" (ngSubmit)="saveRecord()">
+      <div class="form-grid">
+        <label>Select employee
+          <select name="employeeId" [(ngModel)]="reviewForm.employeeId" required>
+            <option [ngValue]="null" disabled>Choose an employee</option>
+            <option *ngFor="let emp of employeesList" [ngValue]="emp.id">
+              {{ emp.firstName }} {{ emp.lastName }} ({{ emp.department }} - {{ emp.jobTitle }})
+            </option>
+          </select>
+        </label>
+        <label>Review period (e.g. Q3 2026)<input name="reviewPeriod" [(ngModel)]="reviewForm.reviewPeriod" required /></label>
+        <label>Rating (1 to 5 stars)
+          <select name="rating" [(ngModel)]="reviewForm.rating">
+            <option [ngValue]="5">5 - Outstanding</option>
+            <option [ngValue]="4">4 - Exceeds Expectations</option>
+            <option [ngValue]="3">3 - Meets Expectations</option>
+            <option [ngValue]="2">2 - Needs Improvement</option>
+            <option [ngValue]="1">1 - Unsatisfactory</option>
+          </select>
+        </label>
+        <label>Review date<input name="reviewDate" type="date" [(ngModel)]="reviewForm.reviewDate" /></label>
+        <label class="full-width">Review comments
+          <textarea name="comments" rows="3" [(ngModel)]="reviewForm.comments" placeholder="Performance notes, feedback, and achievements..."></textarea>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button class="ghost-button" type="button" (click)="closeModal()">Cancel</button>
+        <button class="primary-button" type="submit" [disabled]="saving">{{ saving ? 'Saving...' : 'Save Review' }}</button>
+      </div>
+    </form>
+  </div>
+</div>

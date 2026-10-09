@@ -1,0 +1,124 @@
+<section class="dashboard-heading">
+  <div>
+    <p class="eyebrow">{{ today }}</p>
+    <h1>Good morning, Admin</h1>
+    <p>Here is your people operations and workspace overview for today.</p>
+  </div>
+  <a routerLink="/employees" class="primary-button">+ Add employee</a>
+</section>
+
+<p class="error-banner" *ngIf="error">{{ error }}</p>
+
+<div class="stats-grid" *ngIf="!loading && analytics">
+  <article class="stat-card accent-teal">
+    <span class="stat-icon">♙</span>
+    <p>People</p>
+    <strong>{{ analytics.totalEmployees }}</strong>
+    <small>active workforce</small>
+  </article>
+
+  <article class="stat-card accent-orange">
+    <span class="stat-icon">✦</span>
+    <p>Applicants</p>
+    <strong>{{ analytics.totalCandidates }}</strong>
+    <small>in recruitment funnel</small>
+  </article>
+
+  <article class="stat-card accent-purple">
+    <span class="stat-icon">💼</span>
+    <p>Open Positions</p>
+    <strong>{{ analytics.totalJobs ?? 0 }}</strong>
+    <small>active hiring roles</small>
+  </article>
+
+  <article class="stat-card accent-blue">
+    <span class="stat-icon">▣</span>
+    <p>Payroll Records</p>
+    <strong>{{ analytics.totalPayrollRecords }}</strong>
+    <small>disbursed to date</small>
+  </article>
+
+  <article class="stat-card accent-green">
+    <span class="stat-icon">★</span>
+    <p>Avg Rating</p>
+    <strong>{{ analytics.averageRating ? analytics.averageRating : 'N/A' }}</strong>
+    <small>performance score</small>
+  </article>
+</div>
+
+<div class="loading-state" *ngIf="loading">Connecting to your HR workspace...</div>
+
+<div class="content-grid" *ngIf="analytics">
+  <article class="panel department-panel">
+    <div class="panel-heading">
+      <div>
+        <p class="eyebrow">TEAM SHAPE</p>
+        <h2>Employees by department</h2>
+      </div>
+      <a routerLink="/employees">View directory →</a>
+    </div>
+
+    <div class="department-row" *ngFor="let department of departments">
+      <div>
+        <strong>{{ department.name }}</strong>
+        <span>{{ department.count }} people</span>
+      </div>
+      <div class="bar">
+        <i [style.width.%]="department.percent"></i>
+      </div>
+      <b>{{ department.percent | number:'1.0-0' }}%</b>
+    </div>
+
+    <div class="empty-state" *ngIf="!departments.length">No department data yet.</div>
+  </article>
+
+  <article class="panel quick-panel">
+    <p class="eyebrow">QUICK ACTIONS</p>
+    <h2>Keep work moving</h2>
+
+    <a routerLink="/employees">
+      <span>＋</span>
+      <div>
+        <strong>Add a new employee</strong>
+        <small>Create an employee record</small>
+      </div>
+      →
+    </a>
+
+    <a routerLink="/candidates">
+      <span>✦</span>
+      <div>
+        <strong>Review candidates</strong>
+        <small>Manage hiring and onboarding</small>
+      </div>
+      →
+    </a>
+
+    <a routerLink="/jobs">
+      <span>💼</span>
+      <div>
+        <strong>Manage job requisitions</strong>
+        <small>Post and track openings</small>
+      </div>
+      →
+    </a>
+
+    <a routerLink="/payroll">
+      <span>▣</span>
+      <div>
+        <strong>Process payroll</strong>
+        <small>Issue and track payments</small>
+      </div>
+      →
+    </a>
+
+    <a routerLink="/performance">
+      <span>★</span>
+      <div>
+        <strong>Performance reviews</strong>
+        <small>Log appraisals and ratings</small>
+      </div>
+      →
+    </a>
+  </article>
+</div>
