@@ -23,6 +23,9 @@ jobs:
     name: Backend CI (Java 17 / Spring Boot)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: Desktop/healthcare
 
     steps:
       - name: Check out repository
@@ -51,7 +54,7 @@ jobs:
         if: always()
         with:
           name: backend-test-reports
-          path: target/surefire-reports/
+          path: Desktop/healthcare/target/surefire-reports/
           retention-days: 7
 
       - name: Upload Spring Boot Application JAR
@@ -59,7 +62,7 @@ jobs:
         if: success()
         with:
           name: hrgenius-backend-jar
-          path: target/*.jar
+          path: Desktop/healthcare/target/*.jar
           retention-days: 7
 
   # =========================================================================
