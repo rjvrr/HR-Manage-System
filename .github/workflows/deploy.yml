@@ -1,0 +1,102 @@
+name: HRGenius Deployment Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment target environment"
+        required: true
+        default: "production"
+        type: choice
+        options:
+          - production
+          - staging
+      dry_run:
+        description: "Perform dry-run verification only"
+        required: true
+        default: false
+        type: boolean
+
+# Optional automatic deployment when CI succeeds on the main branch:
+#  workflow_run:
+#    workflows: ["HRGenius CI Pipeline"]
+#    branches: [main]
+#    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.event.inputs.environment || 'production' }}
+  cancel-in-progress: false
+
+jobs:
+  validate-deployment-prerequisites:
+    name: Validate Deployment Prerequisites
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # If using workflow_run, only deploy if CI succeeded:
+    # if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success') }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Verify Deployment Readiness
+        run: |
+          echo "=========================================================="
+          echo "HRGenius Deployment Preparation"
+          echo "Target Environment: ${{ github.event.inputs.environment || 'production' }}"
+          echo "Dry Run Mode: ${{ github.event.inputs.dry_run || false }}"
+          echo "Git Commit SHA: ${{ github.sha }}"
+          echo "=========================================================="
+          echo "Prerequisites Checklist:"
+          echo "  - Backend: Spring Boot application package"
+          echo "  - Frontend: Angular production dist build"
+          echo "  - Database: MySQL target server and credentials"
+          echo "=========================================================="
+
+  deploy:
+    name: Deploy to ${{ github.event.inputs.environment || 'production' }}
+    needs: validate-deployment-prerequisites
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: ${{ github.event.inputs.environment || 'production' }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17 for backend package verification
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Setup Node 22 for frontend build verification
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build Application Packages
+        run: |
+          chmod +x ./mvnw
+          ./mvnw -B package -DskipTests
+          cd frontend
+          npm ci
+          npm run build
+
+      - name: Execute Deployment
+        run: |
+          echo "------------------------------------------------------------------"
+          echo "DEPLOYMENT STAGING COMPLETE"
+          echo "No external hosting target (AWS/GCP/Azure/VPS/Docker) is currently"
+          echo "configured in this repository."
+          echo ""
+          echo "To activate automated deployment to your hosting environment:"
+          echo "1. Configure GitHub Environment secrets (e.g., DEPLOY_HOST, SSH_KEY, or AWS/DOCKER credentials)."
+          echo "2. Add your deployment script below (e.g., rsync, docker push, or kubectl apply)."
+          echo "------------------------------------------------------------------"
