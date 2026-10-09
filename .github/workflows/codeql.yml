@@ -52,6 +52,7 @@ jobs:
 
       - name: Compile Java code for CodeQL
         if: matrix.language == 'java-kotlin'
+        working-directory: Desktop/healthcare
         run: |
           chmod +x ./mvnw
           ./mvnw -B compile -DskipTests
